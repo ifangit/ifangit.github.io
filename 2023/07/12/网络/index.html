@@ -3,7 +3,7 @@
 <html lang="zh-CN">
     <head>
         <meta charset="utf-8" />
-        <title> | ifan&#39;s blog</title>
+        <title>网络 | ifan&#39;s blog</title>
         <meta name="author" content="ifan" />
         <meta name="description" content="" />
         <meta name="keywords" content="" />
@@ -13,6 +13,8 @@
 <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.3.0/css/all.min.css" />
 <link rel="stylesheet" href="/css/fonts.min.css" />
 <script> const mixins = {}; </script>
+
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
 
 
 <script src="https://cdn.staticfile.org/highlight.js/11.7.0/highlight.min.js"></script>
@@ -153,21 +155,52 @@
                 <div id="main" v-show="!loading">
                     <div class="article">
     <div>
-        <h1></h1>
+        <h1>网络</h1>
     </div>
     <div class="info">
         <span class="date">
             <span class="icon">
                 <i class="fa-solid fa-calendar fa-fw"></i>
             </span>
-            1970/1/1
+            2023/7/12
         </span>
         
+        <span class="category">
+            <a href="/categories/linux%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91/">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                linux应用开发
+            </a>
+        </span>
+        
+        
+        <span class="tags">
+            <span class="icon">
+                <i class="fa-solid fa-tags fa-fw"></i>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/%E6%8A%80%E6%9C%AF/" style="color: #00bcd4">技术</a>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/%E7%BC%96%E7%A8%8B/" style="color: #ffa2c4">编程</a>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/linux/" style="color: #03a9f4">linux</a>
+            </span>
+            
+        </span>
         
     </div>
     
     <div class="content" v-pre>
-        <h1 id="网络"><a href="#网络" class="headerlink" title="网络"></a>网络</h1><h2 id="创建socket"><a href="#创建socket" class="headerlink" title="创建socket"></a>创建socket</h2><pre><code class="c++">#include &lt;sys/types.h&gt;          /* See NOTES */
+        <h2 id="创建socket"><a href="#创建socket" class="headerlink" title="创建socket"></a>创建socket</h2><pre><code class="c++">#include &lt;sys/types.h&gt;          /* See NOTES */
 #include &lt;sys/socket.h&gt;
 int socket(int domain, int type, int protocol);
 # creates  an  endpoint  for  communication  and  returns a descriptor
@@ -438,6 +471,10 @@ int main(int argc, char* argv[])
     
     
     
+    <div id="comment">
+        <div id="giscus-container" class="giscus"></div>
+    </div>
+    
     
     
     <div id="comment">
@@ -485,6 +522,23 @@ int main(int argc, char* argv[])
         <script src="/js/main.js"></script>
         
         
+<script
+    src="https://giscus.app/client.js"
+    data-repo=""
+    data-repo-id=""
+    data-category=""
+    data-category-id=""
+    data-mapping="pathname"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="bottom"
+    data-theme="preferred_color_scheme"
+    data-lang=""
+    crossorigin
+    async
+></script>
+
 
 
 
