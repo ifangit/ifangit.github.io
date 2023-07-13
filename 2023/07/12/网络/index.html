@@ -3,9 +3,9 @@
 <html lang="zh-CN">
     <head>
         <meta charset="utf-8" />
-        <title>网络 | ifan&#39;s blog</title>
+        <title>网络 | ifanの小窝</title>
         <meta name="author" content="ifan" />
-        <meta name="description" content="" />
+        <meta name="description" content="风带来故事的种子" />
         <meta name="keywords" content="" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
         <link rel="icon" href="/images/favicon.png" />
@@ -59,7 +59,7 @@
             <nav id="menu" :class="{ hidden: hiddenMenu, 'menu-color': menuColor}">
     <div id="desktop-menu">
         <a class="title" href="/">
-            <span>IFAN&#39;S BLOG</span>
+            <span>IFANの小窝</span>
         </a>
         
         <a href="/">
@@ -91,7 +91,7 @@
     <div id="mobile-menu">
         <div class="title" @click="showMenuItems = !showMenuItems">
             <i class="fa-solid fa-bars fa-fw"></i>
-            <span>&emsp;IFAN&#39;S BLOG</span>
+            <span>&emsp;IFANの小窝</span>
         </div>
         <transition name="slide">
             <div class="items" v-show="showMenuItems">
@@ -185,12 +185,12 @@
             
             <span class="tag">
                 
-                <a href="/tags/%E7%BC%96%E7%A8%8B/" style="color: #ff7d73">编程</a>
+                <a href="/tags/%E7%BC%96%E7%A8%8B/" style="color: #ffa2c4">编程</a>
             </span>
             
             <span class="tag">
                 
-                <a href="/tags/linux/" style="color: #03a9f4">linux</a>
+                <a href="/tags/linux/" style="color: #00bcd4">linux</a>
             </span>
             
         </span>
@@ -201,11 +201,13 @@
         <h2 id="创建socket"><a href="#创建socket" class="headerlink" title="创建socket"></a>创建socket</h2><pre><code class="c++">#include &lt;sys/types.h&gt;          /* See NOTES */
 #include &lt;sys/socket.h&gt;
 int socket(int domain, int type, int protocol);
+/*
 # creates  an  endpoint  for  communication  and  returns a descriptor
 # domain：地址类型，上面解释过
 # type：流式套接，SOCK_STREAM代表TCP，SOCK_DGRAM代表UDP
 # 一般设置为0
 # 返回值为文件描述符，默认从3开始。失败返回-1
+*/
 </code></pre>
 <table>
 <thead>
@@ -482,7 +484,7 @@ int main(int argc, char* argv[])
     <div id="footer-wrap">
         <div>
             &copy;
-            2022 - 2023 ifan&#39;s blog
+            2022 - 2023 ifanの小窝
             <span id="footer-icon">
                 <i class="fa-solid fa-font-awesome fa-fw"></i>
             </span>
@@ -518,12 +520,13 @@ int main(int argc, char* argv[])
             style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 32767"
         ></canvas>
         <script src="https://cdn.staticfile.org/animejs/3.2.1/anime.min.js"></script>
+        <script src="/js/fireworks.min.js"></script>
         <canvas
             id="background"
             style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: -1"
         ></canvas>
         <script src="/js/background.min.js"></script>
-        <script src="/js/fireworks.min.js"></script>
+        
         <script src="/js/main.js"></script>
         
         

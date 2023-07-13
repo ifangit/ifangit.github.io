@@ -3,9 +3,9 @@
 <html lang="zh-CN">
     <head>
         <meta charset="utf-8" />
-        <title>ifan&#39;s blog</title>
+        <title>ifanの小窝</title>
         <meta name="author" content="ifan" />
-        <meta name="description" content="" />
+        <meta name="description" content="风带来故事的种子" />
         <meta name="keywords" content="" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
         <link rel="icon" href="/images/favicon.png" />
@@ -57,7 +57,7 @@
             <nav id="menu" :class="{ hidden: hiddenMenu, 'menu-color': menuColor}">
     <div id="desktop-menu">
         <a class="title" href="/">
-            <span>IFAN&#39;S BLOG</span>
+            <span>IFANの小窝</span>
         </a>
         
         <a href="/">
@@ -89,7 +89,7 @@
     <div id="mobile-menu">
         <div class="title" @click="showMenuItems = !showMenuItems">
             <i class="fa-solid fa-bars fa-fw"></i>
-            <span>&emsp;IFAN&#39;S BLOG</span>
+            <span>&emsp;IFANの小窝</span>
         </div>
         <transition name="slide">
             <div class="items" v-show="showMenuItems">
@@ -158,9 +158,9 @@
         <span class="loop"></span>
         <span class="info">
             <div class="wrap">
-                <h1>ifan&#39;s blog</h1>
+                <h1>ifanの小窝</h1>
                 <h3></h3>
-                <h5></h5>
+                <h5>风带来故事的种子</h5>
             </div>
         </span>
     </div>
@@ -210,12 +210,12 @@
         
         <span class="tag">
             
-            <a href="/tags/%E6%8A%80%E6%9C%AF/" style="color: #00bcd4">技术</a>
+            <a href="/tags/%E6%8A%80%E6%9C%AF/" style="color: #ff7d73">技术</a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/%E7%BC%96%E7%A8%8B/" style="color: #00bcd4">编程</a>
+            <a href="/tags/%E7%BC%96%E7%A8%8B/" style="color: #00a596">编程</a>
         </span>
         
         <span class="tag">
@@ -225,48 +225,6 @@
         
     </div>
     <a href="/2023/07/12/%E7%BD%91%E7%BB%9C/" class="go-post">阅读全文</a>
-</div>
-
-<div class="post">
-    <a href="/1970/01/01/hello-world/">
-        <h2 class="post-title">Hello World</h2>
-    </a>
-    <div class="category-and-date">
-        
-        <span class="date">
-            <span class="icon">
-                <i class="fa-solid fa-calendar fa-fw"></i>
-            </span>
-            1970/1/1
-        </span>
-        
-        
-    </div>
-    <div class="description">
-        <div class="content" v-pre>
-            
-            <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><pre><code class="bash">hexo new &quot;My New Post&quot;
-</code></pre>
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><pre><code class="bash">hexo server
-</code></pre>
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><pre><code class="bash">hexo generate
-</code></pre>
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><pre><code class="bash">hexo deploy
-</code></pre>
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
-
-            
-        </div>
-    </div>
-    <div class="post-tags">
-        
-        
-    </div>
-    <a href="/1970/01/01/hello-world/" class="go-post">阅读全文</a>
 </div>
 
 
@@ -318,7 +276,7 @@
     <div id="footer-wrap">
         <div>
             &copy;
-            2022 - 2023 ifan&#39;s blog
+            2022 - 2023 ifanの小窝
             <span id="footer-icon">
                 <i class="fa-solid fa-font-awesome fa-fw"></i>
             </span>
@@ -354,12 +312,13 @@
             style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 32767"
         ></canvas>
         <script src="https://cdn.staticfile.org/animejs/3.2.1/anime.min.js"></script>
+        <script src="/js/fireworks.min.js"></script>
         <canvas
             id="background"
             style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: -1"
         ></canvas>
         <script src="/js/background.min.js"></script>
-        <script src="/js/fireworks.min.js"></script>
+        
         <script src="/js/main.js"></script>
         
     </body>

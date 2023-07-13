@@ -3,9 +3,9 @@
 <html lang="zh-CN">
     <head>
         <meta charset="utf-8" />
-        <title>about | ifan&#39;s blog</title>
+        <title>about | ifanの小窝</title>
         <meta name="author" content="ifan" />
-        <meta name="description" content="" />
+        <meta name="description" content="风带来故事的种子" />
         <meta name="keywords" content="" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
         <link rel="icon" href="/images/favicon.png" />
@@ -59,7 +59,7 @@
             <nav id="menu" :class="{ hidden: hiddenMenu, 'menu-color': menuColor}">
     <div id="desktop-menu">
         <a class="title" href="/">
-            <span>IFAN&#39;S BLOG</span>
+            <span>IFANの小窝</span>
         </a>
         
         <a href="/">
@@ -91,7 +91,7 @@
     <div id="mobile-menu">
         <div class="title" @click="showMenuItems = !showMenuItems">
             <i class="fa-solid fa-bars fa-fw"></i>
-            <span>&emsp;IFAN&#39;S BLOG</span>
+            <span>&emsp;IFANの小窝</span>
         </div>
         <transition name="slide">
             <div class="items" v-show="showMenuItems">
@@ -186,7 +186,7 @@
     <div id="footer-wrap">
         <div>
             &copy;
-            2022 - 2023 ifan&#39;s blog
+            2022 - 2023 ifanの小窝
             <span id="footer-icon">
                 <i class="fa-solid fa-font-awesome fa-fw"></i>
             </span>
@@ -222,12 +222,13 @@
             style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 32767"
         ></canvas>
         <script src="https://cdn.staticfile.org/animejs/3.2.1/anime.min.js"></script>
+        <script src="/js/fireworks.min.js"></script>
         <canvas
             id="background"
             style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: -1"
         ></canvas>
         <script src="/js/background.min.js"></script>
-        <script src="/js/fireworks.min.js"></script>
+        
         <script src="/js/main.js"></script>
         
         
