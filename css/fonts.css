@@ -1,0 +1,9 @@
+// 引入字体
+@font-face {
+    font-family: 'ZCOOLKuaiLe';
+    src: url('../ZCOOL_KuaiLe/ZCOOLKuaiLe-Regular.ttf');
+}
+// 设置字体，body的话就是全局使用这个字体
+body {
+    font-family: "ZCOOLKuaiLe";
+}
