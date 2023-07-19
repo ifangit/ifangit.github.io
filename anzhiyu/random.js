@@ -1,1 +1,0 @@
-var posts=["2023/07/12/网络/","2023/07/14/hexo博客美化/"];function toRandomPost(){pjax.loadUrl('/'+posts[Math.floor(Math.random() * posts.length)]);};

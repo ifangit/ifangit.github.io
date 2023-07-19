@@ -1,29 +1,512 @@
-extends includes/layout.pug
 
-block content
-  #post
-    if top_img === false || page.bilibili_bg
-      include includes/header/post-info.pug
-    if theme.post_head_ai_description
-      include includes/anzhiyu/ai-info.pug
-    article#article-container.post-content!=page.content
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8" />
+        <title>网络 | ifanの小窝</title>
+        <meta name="author" content="ifan" />
+        <meta name="description" content="风带来故事的种子" />
+        <meta name="keywords" content="" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+        <link rel="icon" href="/images/favicon.png" />
+        <script src="https://cdn.staticfile.org/vue/3.2.47/vue.global.prod.min.js"></script>
+<link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.3.0/css/all.min.css" />
+<link rel="stylesheet" href="/css/fonts.min.css" />
+<script> const mixins = {}; </script>
 
-    //- ptool
-    if theme.ptool.enable
-      include includes/post/ptool.pug
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
 
-    include includes/post/post-copyright.pug
 
-    //- ad
-    if theme.ad && theme.ad.post
-      .ads-wrap!=theme.ad.post
+<script src="https://cdn.staticfile.org/highlight.js/11.7.0/highlight.min.js"></script>
+<script src="https://cdn.staticfile.org/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
+<link
+    rel="stylesheet"
+    href="https://cdn.staticfile.org/highlight.js/11.7.0/styles/github.min.css"
+/>
+<script src="/js/lib/highlight.js"></script>
 
-    if theme.post_pagination
-      include includes/pagination.pug
-    if theme.related_post && theme.related_post.enable
-      != related_posts(page,site.posts)
 
-    if page.comments !== false && theme.comments && theme.comments.use
-      - var commentsJsLoad = true
-      !=partial('includes/third-party/comments/index', {}, {cache: true})
-      
+
+<script src="/js/lib/preview.js"></script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/css/main.css" />
+
+    <meta name="generator" content="Hexo 6.3.0"></head>
+    <body>
+        <div id="layout">
+            <transition name="fade">
+                <div id="loading" v-show="loading">
+                    <div id="loading-circle">
+                        <h2>LOADING</h2>
+                        <p>加载过慢请开启缓存 浏览器默认开启</p>
+                        <img src="/images/loading.gif" />
+                    </div>
+                </div>
+            </transition>
+            <nav id="menu" :class="{ hidden: hiddenMenu, 'menu-color': menuColor}">
+    <div id="desktop-menu">
+        <a class="title" href="/">
+            <span>IFANの小窝</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;Home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;About</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;Archives</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;Categories</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;Tags</span>
+        </a>
+        
+    </div>
+    <div id="mobile-menu">
+        <div class="title" @click="showMenuItems = !showMenuItems">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;IFANの小窝</span>
+        </div>
+        <transition name="slide">
+            <div class="items" v-show="showMenuItems">
+                
+                <a href="/">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-house fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Home</div>
+                    </div>
+                </a>
+                
+                <a href="/about">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-id-card fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">About</div>
+                    </div>
+                </a>
+                
+                <a href="/archives">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-box-archive fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Archives</div>
+                    </div>
+                </a>
+                
+                <a href="/categories">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-bookmark fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Categories</div>
+                    </div>
+                </a>
+                
+                <a href="/tags">
+                    <div class="item">
+                        <div style="min-width: 20px; max-width: 50px; width: 10%">
+                            <i class="fa-solid fa-tags fa-fw"></i>
+                        </div>
+                        <div style="min-width: 100px; max-width: 150%; width: 20%">Tags</div>
+                    </div>
+                </a>
+                
+            </div>
+        </transition>
+    </div>
+</nav>
+<transition name="fade">
+    <div id="menu-curtain" @click="showMenuItems = !showMenuItems" v-show="showMenuItems"></div>
+</transition>
+
+            <transition name="into">
+                <div id="main" v-show="!loading">
+                    <div class="article">
+    <div>
+        <h1>网络</h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2023/7/12
+        </span>
+        
+        <span class="category">
+            <a href="/categories/linux%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91/">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                linux应用开发
+            </a>
+        </span>
+        
+        
+        <span class="tags">
+            <span class="icon">
+                <i class="fa-solid fa-tags fa-fw"></i>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/%E6%8A%80%E6%9C%AF/" style="color: #ffa2c4">技术</a>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/%E7%BC%96%E7%A8%8B/" style="color: #03a9f4">编程</a>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/linux/" style="color: #03a9f4">linux</a>
+            </span>
+            
+        </span>
+        
+    </div>
+    
+    <div class="content" v-pre>
+        <h2 id="创建socket"><a href="#创建socket" class="headerlink" title="创建socket"></a>创建socket</h2><pre><code class="c++">#include &lt;sys/types.h&gt;          /* See NOTES */
+#include &lt;sys/socket.h&gt;
+int socket(int domain, int type, int protocol);
+/*
+# creates  an  endpoint  for  communication  and  returns a descriptor
+# domain：地址类型，上面解释过
+# type：流式套接，SOCK_STREAM代表TCP，SOCK_DGRAM代表UDP
+# 一般设置为0
+# 返回值为文件描述符，默认从3开始。失败返回-1
+*/
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>domain</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AF_INET</td>
+<td>IPv4</td>
+</tr>
+<tr>
+<td>AF_INET6</td>
+<td>IPv6</td>
+</tr>
+<tr>
+<td>AF_UNIX</td>
+<td>UNIX</td>
+</tr>
+<tr>
+<td>AF_UPSPEC</td>
+<td>未指定</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th>type</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>SOCK_DGRAM</td>
+<td>固定长度，无连接，不可靠的报文传递（UDP）</td>
+</tr>
+<tr>
+<td>SOCK_RAW</td>
+<td></td>
+</tr>
+<tr>
+<td>SOCK_SEGPACKET</td>
+<td></td>
+</tr>
+<tr>
+<td>SOCK_STREAM</td>
+<td>有序，可靠，双向，面向连接的字节流（TCP）</td>
+</tr>
+</tbody></table>
+<h2 id="建立连接"><a href="#建立连接" class="headerlink" title="建立连接"></a>建立连接</h2><pre><code class="c++">#include &lt;sys/socket.h&gt;
+int connect(int sockfd, const struct sockaddr *addr, socklen_t len);
+//返回值：若成功，返回0；若出错，返回−1
+</code></pre>
+<pre><code class="c++">#include &lt;sys/socket.h&gt;
+int accept(int sockfd, struct sockaddr *restrict_addr,socklen_t *restrict len);
+/*
+# 参数1 --&gt; 监听套接字；创建socket时获得的文件描述符
+# 参数2、3为输出型参数，用来获取连接client端的协议地址
+# socket_t len = sizeof(struct socketaddr_in);一变量，两应用，既做输入，又做输出
+# 成功返回一个全新的文件描述符，我们把它叫做连接套接字。失败后-1。返回值是真正实现数据通信的套接字
+*/
+</code></pre>
+<h2 id="绑定套接字-bind"><a href="#绑定套接字-bind" class="headerlink" title="绑定套接字 bind"></a>绑定套接字 bind</h2><pre><code class="c++">#include &lt;sys/types.h&gt;          /* See NOTES */
+#include &lt;sys/socket.h&gt;
+int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+/*
+# 参数1 --&gt; 创建socket时获得的文件描述符
+# 参数2 --&gt; 指向特定协议的地址结构的指针
+# 参数3 --&gt; 该地址结构的长度       sockaddr_in的长度，即网络地址的长度
+# 成功返回0， 失败返回-1
+*/
+</code></pre>
+<pre><code class="c++">struct sockaddr_in &#123;
+        sa_family_t           sin_family;    //地址类型
+        __be16                sin_port;    //端口号  
+        struct in_addr        sin_addr;  //IPv4 地址     
+        unsigned char         __pad[__SOCK_SIZE__ - sizeof(short int) -  sizeof(unsigned short int) - sizeof(struct i    n_addr)];
+&#125;;
+/*
+# 参数1 --&gt; 地址类型
+# 参数2 --&gt; 端口号
+# 参数3 --&gt; IP地址，结构体定义如下
+# 参数4 --&gt; 填充位 PAD ，不需要时不用关心该成员
+*/
+ struct in_addr &#123;
+         __be32  s_addr;
+ &#125;;
+
+
+struct sockaddr_in server_addr;
+server_addr.sin_family      = AF_INET;//ipv4
+server_addr.sin_port        = htons(atoi(argv[2]));
+server_addr.sin_addr.s_addr = inet_addr(argv[1]);
+</code></pre>
+<pre><code class="c">#include &lt;arpa/inet.h&gt;
+uint32_t htonl(uint32_t hostlong);
+uint16_t htons(uint16_t hostshort);
+uint32_t ntohl(uint32_t netlong);
+uint16_t ntohs(uint16_t netshort);
+/*
+h表示“主机”字节序，n表示“网络”字节序。l表示“长”（即4字
+节）整数，s表示“短”（即4字节）整数
+*/
+</code></pre>
+<pre><code class="c++">#include &lt;sys/socket.h&gt;
+#include &lt;netinet/in.h&gt;
+#include &lt;arpa/inet.h&gt;
+in_addr_t inet_addr(const char *cp);
+</code></pre>
+<h2 id="监听listen"><a href="#监听listen" class="headerlink" title="监听listen"></a>监听listen</h2><pre><code class="c++">#include &lt;sys/types.h&gt;
+#include &lt;sys/socket.h&gt;
+int listen(int sockfd, int backlog);
+/*
+# 参数1 --&gt; 创建socket时获得的文件描述符
+# 参数2 --&gt; 一般设置为5
+# 成返回0， 失败返回-1
+*/
+</code></pre>
+<h2 id="demo"><a href="#demo" class="headerlink" title="demo"></a>demo</h2><h6 id="客户端"><a href="#客户端" class="headerlink" title="客户端"></a>客户端</h6><pre><code class="c++">#include &lt;stdio.h&gt;
+#include &lt;sys/types.h&gt;
+#include &lt;sys/socket.h&gt;
+#include &lt;netinet/in.h&gt;
+#include &lt;arpa/inet.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+int main(int argc, char *argv[])
+&#123;
+    // check Input
+    if(argc != 3)
+    &#123;
+        printf(&quot;Invalid Input!\n&quot;);
+        printf(&quot;Usage# %s [ip] [port]\n&quot;);
+        return 1;
+    &#125;
+    // create socket
+    int client_sock = socket(AF_INET, SOCK_STREAM, 0);//创建一个套接字文件（IPv4，TCP，默认）
+    if(client_sock &lt; 0)
+    &#123;
+        perror(&quot;socket error&quot;);
+        exit(1);   
+    &#125;
+    // connect
+    struct sockaddr_in server_addr;
+    server_addr.sin_family      = AF_INET;//地址类型 -- IPv4
+    server_addr.sin_port        = htons(atoi(argv[2]));//网络字节序表示的16位整数
+    server_addr.sin_addr.s_addr = inet_addr(argv[1]);//
+    int ret = connect(client_sock, (struct sockaddr *)&amp;server_addr,sizeof(struct sockaddr_in));//
+    if(ret &lt; 0)
+    &#123;
+        perror(&quot;connect error&quot;);
+        printf(&quot;*****************8&quot;);
+        close(client_sock);
+        return 4;
+    &#125;
+    printf(&quot;connect success!\n&quot;);
+    // send
+    while(1)
+    &#123;
+        printf(&quot;Send# &quot;);
+        fflush(stdout);
+        char buf[1024];
+        memset(buf, 0, sizeof(buf));
+        ssize_t _s  = read(stdin, buf, sizeof(buf));
+        printf(&quot;*************************\n&quot;);
+        if(_s &lt; 0)
+        &#123;
+            perror(&quot;read error&quot;);
+            close(client_sock);
+            return 5;
+        &#125;
+        write(client_sock ,buf, _s);
+        memset(buf, 0, sizeof(buf));
+    &#125;
+    return 0;
+&#125;
+</code></pre>
+<h6 id="服务器端"><a href="#服务器端" class="headerlink" title="服务器端"></a>服务器端</h6><pre><code class="c++">#include &lt;stdio.h&gt;
+#include &lt;sys/types.h&gt;
+#include &lt;sys/socket.h&gt;
+#include &lt;netinet/in.h&gt;
+#include &lt;arpa/inet.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+void Usage(char *msg)
+&#123;
+    printf(&quot;invalid Input!\n&quot;);
+    printf(&quot;Usage: %s [ip] [port]\n&quot;,msg);
+&#125;
+int create_socket(char *port, char *addr)
+&#123;
+    // 1.create an endpoint for communication
+    int sock = socket(AF_INET, SOCK_STREAM, 0);
+    if(sock &lt; 0)
+    &#123;
+        perror(&quot;socket error&quot;);
+        exit(1);
+    &#125;
+    //
+    struct sockaddr_in local;
+    local.sin_family = AF_INET;
+    local.sin_port   = htons(atoi(port));
+    local.sin_addr.s_addr   = inet_addr(addr);
+    if(bind(sock, (struct sockaddr *)&amp;local, sizeof(local)) &lt; 0)
+    &#123;
+        perror(&quot;bing error&quot;);
+        close(sock);
+        exit(2);
+    &#125;
+    if(listen(sock, 5) &lt; 0)
+    &#123;
+        perror(&quot;listen error&quot;);
+        close(sock);
+        exit(3);
+    &#125;
+    return sock;
+&#125;
+int main(int argc, char* argv[])
+&#123;
+    if(argc != 3)
+    &#123;
+        Usage(argv[0]);
+        return 1;
+    &#125;
+    // create socket
+    int listen_sock = create_socket(argv[2], argv[1]);
+    struct sockaddr_in client;
+    socklen_t len = sizeof(struct sockaddr);
+    while(1)&#123;
+        char buf[1024];
+        memset(buf, 0, sizeof(buf));
+        int ret = 0;
+        if((ret = accept(listen_sock, (struct sockaddr*)&amp;client, &amp;len)) &lt; 0)
+        &#123;
+            perror(&quot;accept error&quot;);
+            continue;
+        &#125;
+        while(1)
+        &#123;
+            ssize_t _s = read(ret, buf, sizeof(buf)-1);
+            printf(&quot;*************************\n&quot;);
+            if(_s &gt; 0)
+            &#123;
+                printf(&quot;client# &quot;);
+                fflush(stdout);清空输出缓冲区ssiz
+                buf[_s-1] = &#39;\0&#39;;
+                printf(&quot;%s\n&quot;, buf);
+            &#125;
+            else if (_s == 0)
+            &#123;
+                printf(&quot;client quit!\n&quot;);
+                break;
+            &#125;
+        &#125;
+    &#125;
+    return 0;
+&#125;
+</code></pre>
+
+    </div>
+    
+    
+    
+    
+    
+    
+    
+</div>
+
+                    <footer id="footer">
+    <div id="footer-wrap">
+        <div>
+            &copy;
+            2022 - 2023 ifanの小窝
+            <span id="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            &commat;ifan
+        </div>
+        <div>
+            Based on the <a target="_blank" rel="noopener" href="https://hexo.io">Hexo Engine</a> &amp;
+            <a target="_blank" rel="noopener" href="https://github.com/theme-particlex/hexo-theme-particlex">ParticleX Theme</a>
+        </div>
+        
+    </div>
+</footer>
+
+                </div>
+            </transition>
+            
+            <transition name="fade">
+                <div id="preview" ref="preview" v-show="previewShow">
+                    <img id="preview-content" ref="previewContent" />
+                </div>
+            </transition>
+            
+        </div>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/Ukenn2112/UkennWeb@3.0/index/web.js"></script>
+        <script src="/js/main.js"></script>
+        
+        
+
+
+
+
+        
+    </body>
+</html>
