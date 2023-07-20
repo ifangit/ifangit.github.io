@@ -170,6 +170,15 @@
     </a>
     <div class="category-and-date">
         
+        <span class="category">
+            <a href="/categories/linux%E9%A9%B1%E5%8A%A8%E5%BC%80%E5%8F%91/">
+                <span class="icon">
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
+                </span>
+                linux驱动开发
+            </a>
+        </span>
+        
         <span class="date">
             <span class="icon">
                 <i class="fa-solid fa-calendar fa-fw"></i>
@@ -182,63 +191,22 @@
     <div class="description">
         <div class="content" v-pre>
             
-            <h2 id="主机"><a href="#主机" class="headerlink" title="主机"></a>主机</h2><p>在Ubuntu上安装NFS（Network File System）可以按照以下步骤进行操作：</p>
-<ol>
-<li>打开终端：在Ubuntu桌面环境中，您可以使用Ctrl+Alt+T快捷键打开终端，或者在应用程序菜单中搜索并打开终端应用程序。</li>
-<li>安装NFS服务器软件包：在终端中，使用以下命令安装NFS服务器软件包：</li>
-</ol>
-<pre><code class="bash">sudo apt update
-sudo apt install nfs-kernel-server
-</code></pre>
-<p>上述命令将首先更新软件包列表，然后安装<code>nfs-kernel-server</code>软件包，该软件包为Ubuntu提供NFS服务器功能。</p>
-<ol>
-<li>配置NFS共享文件夹：配置文件共享的设置位于<code>/etc/exports</code>文件中。使用您喜欢的文本编辑器（如nano或vim）打开该文件：</li>
-</ol>
-<pre><code class="bash">sudo gedit /etc/exports
-</code></pre>
-<p>在文件中，您可以添加共享文件夹的配置。每个共享都需要一行。例如，要将名为<code>/shared_folder</code>的文件夹共享给所有客户端具有读写权限，您可以在文件中添加以下行：</p>
-<pre><code class="bash">/shared_folder *(rw,sync,no_subtree_check)
-</code></pre>
-<p>注意，这是一个简单的示例配置，其中<code>*</code>表示允许所有客户端访问，<code>rw</code>表示读写权限，<code>sync</code>表示同步写入磁盘，<code>no_subtree_check</code>表示关闭子树检查。</p>
-<ol>
-<li>保存并关闭文件：在Nano编辑器中，按Ctrl+X，然后按Y键保存文件并关闭编辑器。</li>
-<li>启动NFS服务器：使用以下命令启动NFS服务器：</li>
-</ol>
-<pre><code class="bash">sudo systemctl start nfs-kernel-server
-</code></pre>
-<ol>
-<li>验证NFS共享：您可以使用以下命令来验证NFS共享是否成功：</li>
-</ol>
-<pre><code class="bash">showmount -e localhost
-</code></pre>
-<p>该命令将显示本地NFS服务器上共享的文件夹列表。</p>
-<p>现在，您已经在Ubuntu上成功安装和配置了NFS服务器。您可以在其他客户端上挂载这些共享文件夹，或者在本地访问它们</p>
-<h2 id="从机"><a href="#从机" class="headerlink" title="从机"></a>从机</h2><p>要在开发版中连接到主机上的NFS共享，您可以按照以下步骤进行操作：</p>
-<ol>
-<li>确保主机上已正确配置和运行NFS服务器。请参考前面提供的关于在主机上安装和配置NFS的说明。</li>
-<li>在开发版中，打开终端应用程序。</li>
-<li>创建一个本地目录，用于将NFS共享文件夹挂载到开发版上。例如，您可以在开发版上创建一个名为<code>/mnt/nfs</code>的目录：</li>
-</ol>
-<pre><code class="bash">sudo mkdir /mnt/nfs
-</code></pre>
-<ol>
-<li>使用<code>mount</code>命令将主机上的NFS共享文件夹挂载到刚刚创建的本地目录。假设主机的IP地址为<code>&lt;host_ip&gt;</code>，共享的文件夹路径为<code>&lt;shared_folder&gt;</code>，则可以使用以下命令进行挂载：</li>
-</ol>
-<pre><code class="bash">sudo mount &lt;host_ip&gt;:&lt;shared_folder&gt; /mnt/nfs
-</code></pre>
-<p>请将<code>&lt;host_ip&gt;</code>替换为主机的实际IP地址，将<code>&lt;shared_folder&gt;</code>替换为要共享的文件夹路径。</p>
-<ol>
-<li>输入您的sudo密码，以便进行挂载操作。</li>
-<li>挂载成功后，您可以在<code>/mnt/nfs</code>目录中访问和操作主机上的NFS共享文件。</li>
-</ol>
-<p>请注意，连接到NFS共享时，确保主机和开发版之间的网络连接是可靠的。此外，您可能需要根据主机上的NFS共享配置进行适当的权限设置，以便开发版能够正确访问共享文件夹。</p>
-<p>如果您想要在每次开机时自动挂载NFS共享，可以将相应的挂载命令添加到开发版的启动脚本中，例如<code>/etc/rc.local</code>或使用自动挂载工具，如<code>autofs</code>。这样可以确保在开机时自动挂载NFS共享。</p>
+            <p>挂载NFS网络文件系统实现共享文件夹</p>
 
             
         </div>
     </div>
     <div class="post-tags">
         
+        <span class="icon">
+            <i class="fa-solid fa-tags fa-fw"></i>
+        </span>
+        
+        
+        <span class="tag">
+            
+            <a href="/tags/linux/" style="color: #ffa2c4">linux</a>
+        </span>
         
     </div>
     <a href="/2023/07/19/%E6%8C%82%E8%BD%BDNFS%E7%BD%91%E7%BB%9C%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E5%AE%9E%E7%8E%B0%E5%85%B1%E4%BA%AB%E6%96%87%E4%BB%B6%E5%A4%B9/" class="go-post">阅读全文</a>
@@ -285,7 +253,7 @@ sudo apt install nfs-kernel-server
         
         <span class="tag">
             
-            <a href="/tags/%E5%8D%9A%E5%AE%A2%E6%95%99%E7%A8%8B/" style="color: #ff7d73">博客教程</a>
+            <a href="/tags/%E5%8D%9A%E5%AE%A2%E6%95%99%E7%A8%8B/" style="color: #03a9f4">博客教程</a>
         </span>
         
     </div>
@@ -333,12 +301,12 @@ sudo apt install nfs-kernel-server
         
         <span class="tag">
             
-            <a href="/tags/%E6%8A%80%E6%9C%AF/" style="color: #00bcd4">技术</a>
+            <a href="/tags/%E6%8A%80%E6%9C%AF/" style="color: #00a596">技术</a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/%E7%BC%96%E7%A8%8B/" style="color: #ff7d73">编程</a>
+            <a href="/tags/%E7%BC%96%E7%A8%8B/" style="color: #00bcd4">编程</a>
         </span>
         
         <span class="tag">
