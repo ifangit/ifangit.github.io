@@ -196,108 +196,7 @@
     <div class="description">
         <div class="content" v-pre>
             
-            <p>在裸机实验中处理中断的方法可以总结为以下步骤：</p>
-<ol>
-<li>使能中断：需要初始化相应的寄存器来允许中断的触发和处理。这通常涉及设置特定的中断控制寄存器或标志位。</li>
-<li>注册中断服务函数：将中断服务函数注册到中断向量表或中断处理表中。这可以通过将中断服务函数的地址写入指定标号的中断表项或中断向量表项来完成。</li>
-<li>中断发生：当发生中断时，处理器会跳转到IRQ中断服务函数的入口地址。这是由中断控制器或处理器硬件自动完成的。</li>
-<li>中断服务函数处理：在IRQ中断服务函数中，可以通过访问中断表或中断向量表，根据中断号查找具体的中断处理函数，并执行相应的中断处理逻辑。</li>
-</ol>
-<p>API 函数：</p>
-<p>当涉及到Linux中断API函数时，以下是一些常见的函数和它们的详细说明：</p>
-<ul>
-<li><code>request_irq()</code>函数：该函数用于请求和注册中断处理函数。它的原型如下：</li>
-</ul>
-<pre><code class="c">int request_irq(unsigned int irq, irq_handler_t handler, unsigned long flags,
-                const char *name, void *dev);
-</code></pre>
-<ul>
-<li>参数<code>irq</code>：指定中断号。</li>
-<li>参数<code>handler</code>：中断处理函数的指针，是一个具有特定签名的函数，用于实际处理中断。</li>
-<li>参数<code>flags</code>：指定中断处理的属性和行为，如中断类型、中断共享等。</li>
-<li>参数<code>name</code>：中断的名称，用于标识中断处理。</li>
-<li>参数<code>dev</code>：传递给中断处理函数的设备数据。</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th>标志位</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>IRQF_TRIGGER_LOW</td>
-<td>指定中断触发电平为低电平。</td>
-</tr>
-<tr>
-<td>IRQF_TRIGGER_HIGH</td>
-<td>指定中断触发电平为高电平。</td>
-</tr>
-<tr>
-<td>IRQF_TRIGGER_FALLING</td>
-<td>指定中断触发边沿为下降沿。</td>
-</tr>
-<tr>
-<td>IRQF_TRIGGER_RISING</td>
-<td>指定中断触发边沿为上升沿。</td>
-</tr>
-<tr>
-<td>IRQF_TRIGGER_BOTH</td>
-<td>指定中断触发边沿为双边沿。</td>
-</tr>
-<tr>
-<td>IRQF_SHARED</td>
-<td>指定中断为共享中断。</td>
-</tr>
-<tr>
-<td>IRQF_NO_SUSPEND</td>
-<td>指定中断在系统暂停（suspend）期间不会被自动屏蔽。</td>
-</tr>
-<tr>
-<td>IRQF_NO_THREAD</td>
-<td>指定中断处理函数不运行在独立的内核线程中，而是在中断上下文中执行。</td>
-</tr>
-<tr>
-<td>IRQF_ONESHOT</td>
-<td>指定中断为一次性中断。</td>
-</tr>
-<tr>
-<td>IRQF_TRIGGER_PROBE</td>
-<td>指定中断为探测中断。</td>
-</tr>
-</tbody></table>
-<p>该函数会请求指定的中断，并将中断处理函数与中断号相关联。成功注册中断处理后，中断将被触发时调用指定的中断处理函数。</p>
-<ul>
-<li><code>free_irq()</code>函数：该函数用于释放先前注册的中断处理函数。它的原型如下：</li>
-</ul>
-<pre><code class="c">void free_irq(unsigned int irq, void *dev);
-</code></pre>
-<ul>
-<li>参数<code>irq</code>：指定中断号。</li>
-<li>参数<code>dev</code>：之前传递给<code>request_irq()</code>函数的设备数据。</li>
-</ul>
-<p>该函数用于解除中断处理函数与中断号的关联，停止对指定中断的处理。在不再需要某个中断时，应使用该函数进行释放，以便其他设备或模块可以使用该中断。</p>
-<ul>
-<li><code>enable_irq()</code>和<code>disable_irq()</code>函数：这两个函数分别用于使能和禁用指定的中断。它们的原型如下：</li>
-</ul>
-<pre><code class="c">void enable_irq(unsigned int irq);
-void disable_irq(unsigned int irq);
-</code></pre>
-<ul>
-<li>参数<code>irq</code>：指定中断号。</li>
-</ul>
-<p>通过调用<code>enable_irq()</code>函数，可以使能指定的中断，允许其触发和处理。而调用<code>disable_irq()</code>函数，则可以禁用指定的中断，阻止其触发和处理。这些函数对于临时禁用或重新启用中断非常有用。</p>
-<ul>
-<li><code>irq_set_affinity()</code>函数：该函数用于设置中断亲和性，将中断限制在特定的处理器核心上进行处理。它的原型如下：</li>
-</ul>
-<pre><code class="c">int irq_set_affinity(unsigned int irq, const struct cpumask *mask);
-</code></pre>
-<ul>
-<li>参数<code>irq</code>：指定中断号。</li>
-<li>参数<code>mask</code>：指定中断要限制的处理器核心。</li>
-</ul>
-<p>通过调用该函数，可以将特定的中断请求限制在指定的处理器核心上进行处理，以实现更好的中断处理性能。</p>
-<p>这些函数是Linux内核中常见的中断API函数，用于管理和控制中断处理。它们提供了灵活且强大的机制，使开发</p>
+            <p>linux驱动开发，中断实验</p>
 
             
         </div>
@@ -359,7 +258,7 @@ void disable_irq(unsigned int irq);
         
         <span class="tag">
             
-            <a href="/tags/linux/" style="color: #ffa2c4">linux</a>
+            <a href="/tags/linux/" style="color: #03a9f4">linux</a>
         </span>
         
     </div>
@@ -407,7 +306,7 @@ void disable_irq(unsigned int irq);
         
         <span class="tag">
             
-            <a href="/tags/%E5%8D%9A%E5%AE%A2%E6%95%99%E7%A8%8B/" style="color: #ffa2c4">博客教程</a>
+            <a href="/tags/%E5%8D%9A%E5%AE%A2%E6%95%99%E7%A8%8B/" style="color: #00a596">博客教程</a>
         </span>
         
     </div>
@@ -455,17 +354,17 @@ void disable_irq(unsigned int irq);
         
         <span class="tag">
             
-            <a href="/tags/%E6%8A%80%E6%9C%AF/" style="color: #03a9f4">技术</a>
+            <a href="/tags/%E6%8A%80%E6%9C%AF/" style="color: #ff7d73">技术</a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/%E7%BC%96%E7%A8%8B/" style="color: #00bcd4">编程</a>
+            <a href="/tags/%E7%BC%96%E7%A8%8B/" style="color: #ffa2c4">编程</a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/linux/" style="color: #00a596">linux</a>
+            <a href="/tags/linux/" style="color: #ffa2c4">linux</a>
         </span>
         
     </div>
