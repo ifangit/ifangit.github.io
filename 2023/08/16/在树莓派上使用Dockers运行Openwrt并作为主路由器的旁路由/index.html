@@ -3,7 +3,7 @@
 <html lang="zh-CN">
     <head>
         <meta charset="utf-8" />
-        <title>tags | ifanの小窝</title>
+        <title>在树莓派上使用Dockers运行Openwrt并作为主路由器的旁路由 | ifanの小窝</title>
         <meta name="author" content="ifan" />
         <meta name="description" content="风带来故事的种子" />
         <meta name="keywords" content="" />
@@ -33,6 +33,10 @@
 
 
 <script src="/js/lib/preview.js"></script>
+
+
+
+
 
 
 
@@ -147,88 +151,158 @@
 
             <transition name="into">
                 <div id="main" v-show="!loading">
-                    <div id="archives">
-    
-    <div class="categories-tags">
+                    <div class="article">
+    <div>
+        <h1>在树莓派上使用Dockers运行Openwrt并作为主路由器的旁路由</h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <i class="fa-solid fa-calendar fa-fw"></i>
+            </span>
+            2023/8/16
+        </span>
         
-        
-        <span>
-            <a href="/tags/%E6%8A%80%E6%9C%AF/" style="background: #00a596">
+        <span class="category">
+            <a href="/categories/%E6%95%99%E7%A8%8B/">
                 <span class="icon">
-                    <i class="fa-solid fa-tags fa-fw"></i>
+                    <i class="fa-solid fa-bookmark fa-fw"></i>
                 </span>
-                技术
+                教程
             </a>
         </span>
         
         
-        
-        <span>
-            <a href="/tags/%E7%BC%96%E7%A8%8B/" style="background: #00bcd4">
-                <span class="icon">
-                    <i class="fa-solid fa-tags fa-fw"></i>
-                </span>
-                编程
-            </a>
+        <span class="tags">
+            <span class="icon">
+                <i class="fa-solid fa-tags fa-fw"></i>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/%E6%A0%91%E8%8E%93%E6%B4%BE/" style="color: #ff7d73">树莓派</a>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/Docker/" style="color: #00a596">Docker</a>
+            </span>
+            
         </span>
-        
-        
-        
-        <span>
-            <a href="/tags/linux/" style="background: #ff7d73">
-                <span class="icon">
-                    <i class="fa-solid fa-tags fa-fw"></i>
-                </span>
-                linux
-            </a>
-        </span>
-        
-        
-        
-        <span>
-            <a href="/tags/%E5%8D%9A%E5%AE%A2%E6%95%99%E7%A8%8B/" style="background: #00bcd4">
-                <span class="icon">
-                    <i class="fa-solid fa-tags fa-fw"></i>
-                </span>
-                博客教程
-            </a>
-        </span>
-        
-        
-        
-        <span>
-            <a href="/tags/linux%E9%A9%B1%E5%8A%A8%E5%BC%80%E5%8F%91/" style="background: #00a596">
-                <span class="icon">
-                    <i class="fa-solid fa-tags fa-fw"></i>
-                </span>
-                linux驱动开发
-            </a>
-        </span>
-        
-        
-        
-        <span>
-            <a href="/tags/%E6%A0%91%E8%8E%93%E6%B4%BE/" style="background: #00a596">
-                <span class="icon">
-                    <i class="fa-solid fa-tags fa-fw"></i>
-                </span>
-                树莓派
-            </a>
-        </span>
-        
-        
-        
-        <span>
-            <a href="/tags/Docker/" style="background: #03a9f4">
-                <span class="icon">
-                    <i class="fa-solid fa-tags fa-fw"></i>
-                </span>
-                Docker
-            </a>
-        </span>
-        
         
     </div>
+    
+    <div class="content" v-pre>
+        <p>[TOC]</p>
+<h3 id="开启网卡混杂模式"><a href="#开启网卡混杂模式" class="headerlink" title="开启网卡混杂模式"></a>开启网卡混杂模式</h3><pre><code class="bash">sudo ip link set eth0 promisc on
+</code></pre>
+<h4 id="首先需要新建一个-x2F-etc-x2F-rc-local并添加可执行权限"><a href="#首先需要新建一个-x2F-etc-x2F-rc-local并添加可执行权限" class="headerlink" title="首先需要新建一个&#x2F;etc&#x2F;rc.local并添加可执行权限"></a>首先需要新建一个&#x2F;etc&#x2F;rc.local并添加可执行权限</h4><pre><code class="bash">sudo touch /etc/rc.local
+sudo chmod +x /etc/rc.local
+</code></pre>
+<p> 内容如下：</p>
+<pre><code class="bash">#!/bin/sh -e
+#/etc/rc.local
+#
+# rc.local
+#
+# This script is executed at the end of each multiuser runlevel.
+# Make sure that the script will &quot;exit 0&quot; on success or any other
+# value on error.
+#
+# In order to enable or disable this script just change the execution
+# bits.
+#
+# By default this script does nothing.
+
+# Print the IP address
+_IP=$(hostname -I) || true
+if [ &quot;$_IP&quot; ]; then
+  printf &quot;My IP address is %s\n&quot; &quot;$_IP&quot;
+fi
+
+ip link set eth0 promisc on
+ip link add link eth0 dev mynet type macvlan mode bridge
+ifconfig mynet 192.168.2.149/24
+route add 192.168.2.100 dev mynet
+sleep 18
+route add default gw 192.168.2.100 dev mynet
+
+exit 0
+</code></pre>
+<p>添加systemd程序</p>
+<pre><code class="bash">sudo vim /etc/systemd/system/rc-local.service
+</code></pre>
+<p>内容如下：</p>
+<pre><code class="plain">[Unit]
+ Description=/etc/rc.local Compatibility
+ ConditionPathExists=/etc/rc.local
+ After=network.target
+
+[Service]
+ Type=forking
+ ExecStart=/etc/rc.local start
+ TimeoutSec=0
+ RemainAfterExit=yes
+
+[Install]
+ WantedBy=multi-user.target
+</code></pre>
+<p>启动systemd程序</p>
+<pre><code class="bash">sudo systemctl enable rc-local
+sudo systemctl start rc-local.service
+sudo systemctl status rc-local.service
+</code></pre>
+<h3 id="安装Openwrt"><a href="#安装Openwrt" class="headerlink" title="安装Openwrt"></a>安装Openwrt</h3><h4 id="创建网络"><a href="#创建网络" class="headerlink" title="创建网络"></a>创建网络</h4><pre><code class="bash">docker network create -d macvlan --subnet=192.168.2.0/24 --gateway=192.168.2.1 -o parent=eth0 macnet
+docker network ls
+</code></pre>
+<h4 id="拉取镜像："><a href="#拉取镜像：" class="headerlink" title="拉取镜像："></a>拉取镜像：</h4><pre><code class="bash">arch # 查看系统内核架构，最好拉取和系统架构相符合的镜像
+# 拉取镜像，可以从https://hub.docker.com/r/sulinggg/openwrt查看
+docker pull registry.cn-shanghai.aliyuncs.com/suling/openwrt:rpi4
+</code></pre>
+<h4 id="启动镜像"><a href="#启动镜像" class="headerlink" title="启动镜像"></a>启动镜像</h4><p>启动命令如下</p>
+<pre><code class="bash">sudo docker run --restart always --name openwrt -d --network macnet --privileged registry.cn-shanghai.aliyuncs.com/suling/openwrt:rpi4 /sbin/init
+</code></pre>
+<p><code>--restart always</code>参数表示容器退出时始终重启，使服务尽量保持始终可用；</p>
+<p><code>--name openwrt</code>参数定义了容器的名称；</p>
+<p><code>-d</code>参数定义使容器运行在 Daemon 模式；</p>
+<p><code>--network macnet</code>参数定义将容器加入 <code>maxnet</code>网络；</p>
+<p><code>--privileged </code>参数定义容器运行在特权模式下；</p>
+<p><code>registry.cn-shanghai.aliyuncs.com/suling/openwrt:rpi4</code>为 Docker 镜像名，因容器托管在阿里云 Docker 镜像仓库内，所以在镜像名中含有阿里云仓库信息；</p>
+<p><code>/sbin/init</code>定义容器启动后执行的命令。</p>
+<pre><code class="bash">docker container ps -a
+</code></pre>
+<h4 id="修改容器相关参数"><a href="#修改容器相关参数" class="headerlink" title="修改容器相关参数"></a>修改容器相关参数</h4><p>进入容器</p>
+<pre><code class="bash">docker exec -it openwrt bash
+vim /etc/config/network
+config interface &#39;lan&#39;
+        option ifname &#39;eth0&#39;
+        option proto &#39;static&#39;
+        option netmask &#39;255.255.255.0&#39;
+        option ip6assign &#39;60&#39;
+        option ipaddr &#39;192.168.2.100&#39; #修改一个静态地址，可以通过这个地址访问到树莓派
+        option gateway &#39;192.168.2.1&#39; #修改为路由器地址
+        option dns &#39;192.1682.1&#39;     #修改为路由器地址
+/etc/init.d/network restart
+</code></pre>
+<h4 id="解决在docker中运行openwrt宿主机无法通信的问题"><a href="#解决在docker中运行openwrt宿主机无法通信的问题" class="headerlink" title="解决在docker中运行openwrt宿主机无法通信的问题"></a><strong>解决在docker中运行openwrt宿主机无法通信的问题</strong></h4><pre><code class="bash">ip link set eth0 promisc on
+ip link add link eth0 dev mynet type macvlan mode bridge
+ifconfig mynet 192.168.2.149/24
+route add 192.168.2.100 dev mynet
+sleep 18
+route add default gw 192.168.2.100 dev mynet
+</code></pre>
+
+    </div>
+    
+    
+    
+    
+    <div id="comment">
+        <div id="giscus-container" class="giscus"></div>
+    </div>
+    
+    
+    
     
 </div>
 
@@ -262,6 +336,29 @@
         </div>
         <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/Ukenn2112/UkennWeb@3.0/index/web.js"></script>
         <script src="/js/main.js"></script>
+        
+        
+<script
+    src="https://giscus.app/client.js"
+    data-repo=""
+    data-repo-id=""
+    data-category=""
+    data-category-id=""
+    data-mapping="pathname"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="bottom"
+    data-theme="preferred_color_scheme"
+    data-lang=""
+    crossorigin
+    async
+></script>
+
+
+
+
+
         
     </body>
 </html>
