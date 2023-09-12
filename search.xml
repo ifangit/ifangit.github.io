@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search> 
+  
+  
+    
+    <entry>
+      <title>在树莓派上使用Dockers运行Openwrt并作为主路由器的旁路由</title>
+      <link href="/2023/08/16/%E5%9C%A8%E6%A0%91%E8%8E%93%E6%B4%BE%E4%B8%8A%E4%BD%BF%E7%94%A8Dockers%E8%BF%90%E8%A1%8COpenwrt%E5%B9%B6%E4%BD%9C%E4%B8%BA%E4%B8%BB%E8%B7%AF%E7%94%B1%E5%99%A8%E7%9A%84%E6%97%81%E8%B7%AF%E7%94%B1/"/>
+      <url>/2023/08/16/%E5%9C%A8%E6%A0%91%E8%8E%93%E6%B4%BE%E4%B8%8A%E4%BD%BF%E7%94%A8Dockers%E8%BF%90%E8%A1%8COpenwrt%E5%B9%B6%E4%BD%9C%E4%B8%BA%E4%B8%BB%E8%B7%AF%E7%94%B1%E5%99%A8%E7%9A%84%E6%97%81%E8%B7%AF%E7%94%B1/</url>
+      
+        <content type="html"><![CDATA[<p>[TOC]</p><h3 id="开启网卡混杂模式"><a href="#开启网卡混杂模式" class="headerlink" title="开启网卡混杂模式"></a>开启网卡混杂模式</h3><pre><code class="lang-bash">sudo ip link set eth0 promisc on</code></pre><h4 id="首先需要新建一个-etc-rc-local并添加可执行权限"><a href="#首先需要新建一个-etc-rc-local并添加可执行权限" class="headerlink" title="首先需要新建一个/etc/rc.local并添加可执行权限"></a>首先需要新建一个/etc/rc.local并添加可执行权限</h4><pre><code class="lang-bash">sudo touch /etc/rc.localsudo chmod +x /etc/rc.local</code></pre><p> 内容如下：</p><pre><code class="lang-bash">#!/bin/sh -e#/etc/rc.local## rc.local## This script is executed at the end of each multiuser runlevel.# Make sure that the script will &quot;exit 0&quot; on success or any other# value on error.## In order to enable or disable this script just change the execution# bits.## By default this script does nothing.# Print the IP address_IP=$(hostname -I) || trueif [ &quot;$_IP&quot; ]; then  printf &quot;My IP address is %s\n&quot; &quot;$_IP&quot;fiip link set eth0 promisc onip link add link eth0 dev mynet type macvlan mode bridgeifconfig mynet 192.168.2.149/24route add 192.168.2.100 dev mynetsleep 18route add default gw 192.168.2.100 dev mynetexit 0</code></pre><p>添加systemd程序</p><pre><code class="lang-bash">sudo vim /etc/systemd/system/rc-local.service</code></pre><p>内容如下：</p><pre><code class="lang-plain">[Unit] Description=/etc/rc.local Compatibility ConditionPathExists=/etc/rc.local After=network.target[Service] Type=forking ExecStart=/etc/rc.local start TimeoutSec=0 RemainAfterExit=yes[Install] WantedBy=multi-user.target</code></pre><p>启动systemd程序</p><pre><code class="lang-bash">sudo systemctl enable rc-localsudo systemctl start rc-local.servicesudo systemctl status rc-local.service</code></pre><h3 id="安装Openwrt"><a href="#安装Openwrt" class="headerlink" title="安装Openwrt"></a>安装Openwrt</h3><h4 id="创建网络"><a href="#创建网络" class="headerlink" title="创建网络"></a>创建网络</h4><pre><code class="lang-bash">docker network create -d macvlan --subnet=192.168.2.0/24 --gateway=192.168.2.1 -o parent=eth0 macnetdocker network ls</code></pre><h4 id="拉取镜像："><a href="#拉取镜像：" class="headerlink" title="拉取镜像："></a>拉取镜像：</h4><pre><code class="lang-bash">arch # 查看系统内核架构，最好拉取和系统架构相符合的镜像# 拉取镜像，可以从https://hub.docker.com/r/sulinggg/openwrt查看docker pull registry.cn-shanghai.aliyuncs.com/suling/openwrt:rpi4</code></pre><h4 id="启动镜像"><a href="#启动镜像" class="headerlink" title="启动镜像"></a>启动镜像</h4><p>启动命令如下</p><pre><code class="lang-bash">sudo docker run --restart always --name openwrt -d --network macnet --privileged registry.cn-shanghai.aliyuncs.com/suling/openwrt:rpi4 /sbin/init</code></pre><p><code>--restart always</code>参数表示容器退出时始终重启，使服务尽量保持始终可用；</p><p><code>--name openwrt</code>参数定义了容器的名称；</p><p><code>-d</code>参数定义使容器运行在 Daemon 模式；</p><p><code>--network macnet</code>参数定义将容器加入 <code>maxnet</code>网络；</p><p><code>--privileged</code>参数定义容器运行在特权模式下；</p><p><code>registry.cn-shanghai.aliyuncs.com/suling/openwrt:rpi4</code>为 Docker 镜像名，因容器托管在阿里云 Docker 镜像仓库内，所以在镜像名中含有阿里云仓库信息；</p><p><code>/sbin/init</code>定义容器启动后执行的命令。</p><pre><code class="lang-bash">docker container ps -a</code></pre><h4 id="修改容器相关参数"><a href="#修改容器相关参数" class="headerlink" title="修改容器相关参数"></a>修改容器相关参数</h4><p>进入容器</p><pre><code class="lang-bash">docker exec -it openwrt bashvim /etc/config/networkconfig interface &#39;lan&#39;        option ifname &#39;eth0&#39;        option proto &#39;static&#39;        option netmask &#39;255.255.255.0&#39;        option ip6assign &#39;60&#39;        option ipaddr &#39;192.168.2.100&#39; #修改一个静态地址，可以通过这个地址访问到树莓派        option gateway &#39;192.168.2.1&#39; #修改为路由器地址        option dns &#39;192.1682.1&#39;     #修改为路由器地址/etc/init.d/network restart</code></pre><h4 id="解决在docker中运行openwrt宿主机无法通信的问题"><a href="#解决在docker中运行openwrt宿主机无法通信的问题" class="headerlink" title="解决在docker中运行openwrt宿主机无法通信的问题"></a><strong>解决在docker中运行openwrt宿主机无法通信的问题</strong></h4><pre><code class="lang-bash">ip link set eth0 promisc onip link add link eth0 dev mynet type macvlan mode bridgeifconfig mynet 192.168.2.149/24route add 192.168.2.100 dev mynetsleep 18route add default gw 192.168.2.100 dev mynet</code></pre>]]></content>
+      
+      
+      <categories>
+          
+          <category> 教程 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 树莓派 </tag>
+            
+            <tag> Docker </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>misc驱动浅谈</title>
+      <link href="/2023/07/24/misc%E9%A9%B1%E5%8A%A8%E6%B5%85%E8%B0%88/"/>
+      <url>/2023/07/24/misc%E9%A9%B1%E5%8A%A8%E6%B5%85%E8%B0%88/</url>
+      
+        <content type="html"><![CDATA[<pre><code class="lang-c">struct miscdevice  &#123;    int minor;    const char *name;    const struct file_operations *fops;    struct list_head list;    struct device *parent;    struct device *this_device;    const struct attribute_group **groups;    const char *nodename;    umode_t mode;&#125;;extern int misc_register(struct miscdevice *misc);extern void misc_deregister(struct miscdevice *misc);</code></pre><pre><code class="lang-c">alloc_chrdev_region(); /* 申请设备号 */cdev_init();/* 初始化 cdev */cdev_add();/* 添加 cdev */class_create(); /* 创建类 */device_create();/* 创建设备 */</code></pre><pre><code class="lang-c">int misc_deregister(struct miscdevice *misc)/*函数参数和返回值含义如下：misc：要注销的 MISC 设备。返回值：负数，失败；0，成功。*/cdev_del();/* 删除 cdev */unregister_chrdev_region(); /* 注销设备号 */device_destroy();/* 删除设备 */class_destroy();/* 删除类 */</code></pre>]]></content>
+      
+      
+      <categories>
+          
+          <category> linux驱动开发 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 技术 </tag>
+            
+            <tag> 编程 </tag>
+            
+            <tag> linux </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>linux驱动中断</title>
+      <link href="/2023/07/22/linux%E9%A9%B1%E5%8A%A8%E4%B8%AD%E6%96%AD/"/>
+      <url>/2023/07/22/linux%E9%A9%B1%E5%8A%A8%E4%B8%AD%E6%96%AD/</url>
+      
+        <content type="html"><![CDATA[<p>在裸机实验中处理中断的方法可以总结为以下步骤：</p><ol><li>使能中断：需要初始化相应的寄存器来允许中断的触发和处理。这通常涉及设置特定的中断控制寄存器或标志位。</li><li>注册中断服务函数：将中断服务函数注册到中断向量表或中断处理表中。这可以通过将中断服务函数的地址写入指定标号的中断表项或中断向量表项来完成。</li><li>中断发生：当发生中断时，处理器会跳转到IRQ中断服务函数的入口地址。这是由中断控制器或处理器硬件自动完成的。</li><li>中断服务函数处理：在IRQ中断服务函数中，可以通过访问中断表或中断向量表，根据中断号查找具体的中断处理函数，并执行相应的中断处理逻辑。</li></ol><p>API 函数：</p><p>当涉及到Linux中断API函数时，以下是一些常见的函数和它们的详细说明：</p><ul><li><code>request_irq()</code>函数：该函数用于请求和注册中断处理函数。它的原型如下：</li></ul><pre><code class="lang-c">int request_irq(unsigned int irq, irq_handler_t handler, unsigned long flags,                const char *name, void *dev);</code></pre><ul><li>参数<code>irq</code>：指定中断号。</li><li>参数<code>handler</code>：中断处理函数的指针，是一个具有特定签名的函数，用于实际处理中断。</li><li>参数<code>flags</code>：指定中断处理的属性和行为，如中断类型、中断共享等。</li><li>参数<code>name</code>：中断的名称，用于标识中断处理。</li><li>参数<code>dev</code>：传递给中断处理函数的设备数据。</li></ul><div class="table-container"><table><thead><tr><th>标志位</th><th>描述</th></tr></thead><tbody><tr><td>IRQF_TRIGGER_LOW</td><td>指定中断触发电平为低电平。</td></tr><tr><td>IRQF_TRIGGER_HIGH</td><td>指定中断触发电平为高电平。</td></tr><tr><td>IRQF_TRIGGER_FALLING</td><td>指定中断触发边沿为下降沿。</td></tr><tr><td>IRQF_TRIGGER_RISING</td><td>指定中断触发边沿为上升沿。</td></tr><tr><td>IRQF_TRIGGER_BOTH</td><td>指定中断触发边沿为双边沿。</td></tr><tr><td>IRQF_SHARED</td><td>指定中断为共享中断。</td></tr><tr><td>IRQF_NO_SUSPEND</td><td>指定中断在系统暂停（suspend）期间不会被自动屏蔽。</td></tr><tr><td>IRQF_NO_THREAD</td><td>指定中断处理函数不运行在独立的内核线程中，而是在中断上下文中执行。</td></tr><tr><td>IRQF_ONESHOT</td><td>指定中断为一次性中断。</td></tr><tr><td>IRQF_TRIGGER_PROBE</td><td>指定中断为探测中断。</td></tr></tbody></table></div><p>该函数会请求指定的中断，并将中断处理函数与中断号相关联。成功注册中断处理后，中断将被触发时调用指定的中断处理函数。</p><ul><li><code>free_irq()</code>函数：该函数用于释放先前注册的中断处理函数。它的原型如下：</li></ul><pre><code class="lang-c">void free_irq(unsigned int irq, void *dev);</code></pre><ul><li>参数<code>irq</code>：指定中断号。</li><li>参数<code>dev</code>：之前传递给<code>request_irq()</code>函数的设备数据。</li></ul><p>该函数用于解除中断处理函数与中断号的关联，停止对指定中断的处理。在不再需要某个中断时，应使用该函数进行释放，以便其他设备或模块可以使用该中断。</p><ul><li><code>enable_irq()</code>和<code>disable_irq()</code>函数：这两个函数分别用于使能和禁用指定的中断。它们的原型如下：</li></ul><pre><code class="lang-c">void enable_irq(unsigned int irq);void disable_irq(unsigned int irq);</code></pre><ul><li>参数<code>irq</code>：指定中断号。</li></ul><p>通过调用<code>enable_irq()</code>函数，可以使能指定的中断，允许其触发和处理。而调用<code>disable_irq()</code>函数，则可以禁用指定的中断，阻止其触发和处理。这些函数对于临时禁用或重新启用中断非常有用。</p><ul><li><code>irq_set_affinity()</code>函数：该函数用于设置中断亲和性，将中断限制在特定的处理器核心上进行处理。它的原型如下：</li></ul><pre><code class="lang-c">int irq_set_affinity(unsigned int irq, const struct cpumask *mask);</code></pre><ul><li>参数<code>irq</code>：指定中断号。</li><li>参数<code>mask</code>：指定中断要限制的处理器核心。</li></ul><p>通过调用该函数，可以将特定的中断请求限制在指定的处理器核心上进行处理，以实现更好的中断处理性能。</p><p>这些函数是Linux内核中常见的中断API函数，用于管理和控制中断处理。它们提供了灵活且强大的机制，使开发</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> linux驱动开发 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> linux驱动开发 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>挂载NFS网络文件系统实现共享文件夹</title>
+      <link href="/2023/07/19/%E6%8C%82%E8%BD%BDNFS%E7%BD%91%E7%BB%9C%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E5%AE%9E%E7%8E%B0%E5%85%B1%E4%BA%AB%E6%96%87%E4%BB%B6%E5%A4%B9/"/>
+      <url>/2023/07/19/%E6%8C%82%E8%BD%BDNFS%E7%BD%91%E7%BB%9C%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E5%AE%9E%E7%8E%B0%E5%85%B1%E4%BA%AB%E6%96%87%E4%BB%B6%E5%A4%B9/</url>
+      
+        <content type="html"><![CDATA[<h2 id="主机"><a href="#主机" class="headerlink" title="主机"></a>主机</h2><p>在Ubuntu上安装NFS（Network File System）可以按照以下步骤进行操作：</p><ol><li>打开终端：在Ubuntu桌面环境中，您可以使用Ctrl+Alt+T快捷键打开终端，或者在应用程序菜单中搜索并打开终端应用程序。</li><li>安装NFS服务器软件包：在终端中，使用以下命令安装NFS服务器软件包：</li></ol><pre><code class="lang-bash">sudo apt updatesudo apt install nfs-kernel-server</code></pre><p>上述命令将首先更新软件包列表，然后安装<code>nfs-kernel-server</code>软件包，该软件包为Ubuntu提供NFS服务器功能。</p><ol><li>配置NFS共享文件夹：配置文件共享的设置位于<code>/etc/exports</code>文件中。使用您喜欢的文本编辑器（如nano或vim）打开该文件：</li></ol><pre><code class="lang-bash">sudo gedit /etc/exports</code></pre><p>在文件中，您可以添加共享文件夹的配置。每个共享都需要一行。例如，要将名为<code>/shared_folder</code>的文件夹共享给所有客户端具有读写权限，您可以在文件中添加以下行：</p><pre><code class="lang-bash">/shared_folder *(rw,sync,no_subtree_check)</code></pre><p>注意，这是一个简单的示例配置，其中<code>*</code>表示允许所有客户端访问，<code>rw</code>表示读写权限，<code>sync</code>表示同步写入磁盘，<code>no_subtree_check</code>表示关闭子树检查。</p><ol><li>保存并关闭文件：在Nano编辑器中，按Ctrl+X，然后按Y键保存文件并关闭编辑器。</li><li>启动NFS服务器：使用以下命令启动NFS服务器：</li></ol><pre><code class="lang-bash">sudo systemctl start nfs-kernel-server</code></pre><ol><li>验证NFS共享：您可以使用以下命令来验证NFS共享是否成功：</li></ol><pre><code class="lang-bash">showmount -e localhost</code></pre><p>该命令将显示本地NFS服务器上共享的文件夹列表。</p><p>现在，您已经在Ubuntu上成功安装和配置了NFS服务器。您可以在其他客户端上挂载这些共享文件夹，或者在本地访问它们</p><h2 id="从机"><a href="#从机" class="headerlink" title="从机"></a>从机</h2><p>要在开发版中连接到主机上的NFS共享，您可以按照以下步骤进行操作：</p><ol><li>确保主机上已正确配置和运行NFS服务器。请参考前面提供的关于在主机上安装和配置NFS的说明。</li><li>在开发版中，打开终端应用程序。</li><li>创建一个本地目录，用于将NFS共享文件夹挂载到开发版上。例如，您可以在开发版上创建一个名为<code>/mnt/nfs</code>的目录：</li></ol><pre><code class="lang-bash">sudo mkdir /mnt/nfs</code></pre><ol><li>使用<code>mount</code>命令将主机上的NFS共享文件夹挂载到刚刚创建的本地目录。假设主机的IP地址为<code>&lt;host_ip&gt;</code>，共享的文件夹路径为<code>&lt;shared_folder&gt;</code>，则可以使用以下命令进行挂载：</li></ol><pre><code class="lang-bash">sudo mount &lt;host_ip&gt;:&lt;shared_folder&gt; /mnt/nfs</code></pre><p>请将<code>&lt;host_ip&gt;</code>替换为主机的实际IP地址，将<code>&lt;shared_folder&gt;</code>替换为要共享的文件夹路径。</p><ol><li>输入您的sudo密码，以便进行挂载操作。</li><li>挂载成功后，您可以在<code>/mnt/nfs</code>目录中访问和操作主机上的NFS共享文件。</li></ol><p>请注意，连接到NFS共享时，确保主机和开发版之间的网络连接是可靠的。此外，您可能需要根据主机上的NFS共享配置进行适当的权限设置，以便开发版能够正确访问共享文件夹。</p><p>如果您想要在每次开机时自动挂载NFS共享，可以将相应的挂载命令添加到开发版的启动脚本中，例如<code>/etc/rc.local</code>或使用自动挂载工具，如<code>autofs</code>。这样可以确保在开机时自动挂载NFS共享。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> linux驱动开发 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> linux </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>hexo博客美化</title>
+      <link href="/2023/07/14/hexo%E5%8D%9A%E5%AE%A2%E7%BE%8E%E5%8C%96/"/>
+      <url>/2023/07/14/hexo%E5%8D%9A%E5%AE%A2%E7%BE%8E%E5%8C%96/</url>
+      
+        <content type="html"><![CDATA[<h2 id="飞舞樱花"><a href="#飞舞樱花" class="headerlink" title="飞舞樱花"></a>飞舞樱花</h2><h4 id="引入"><a href="#引入" class="headerlink" title="引入"></a>引入</h4><p>只需要在主页插入：</p><pre><code class="lang-php">&lt;script type=&quot;text/javascript&quot; src=&quot;https://cdn.jsdelivr.net/gh/Ukenn2112/UkennWeb@3.0/index/web.js&quot;&gt;&lt;/script&gt;</code></pre><h4 id="效果"><a href="#效果" class="headerlink" title="效果"></a>效果</h4><p><img src="https://raw.githubusercontent.com/ifangit/blogImige/main/img/20200324051044591.png" alt="樱花效果"></p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 教程 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 博客教程 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>网络</title>
+      <link href="/2023/07/12/%E7%BD%91%E7%BB%9C/"/>
+      <url>/2023/07/12/%E7%BD%91%E7%BB%9C/</url>
+      
+        <content type="html"><![CDATA[<h2 id="创建socket"><a href="#创建socket" class="headerlink" title="创建socket"></a>创建socket</h2><pre><code class="lang-c++">#include &lt;sys/types.h&gt;          /* See NOTES */#include &lt;sys/socket.h&gt;int socket(int domain, int type, int protocol);/*# creates  an  endpoint  for  communication  and  returns a descriptor# domain：地址类型，上面解释过# type：流式套接，SOCK_STREAM代表TCP，SOCK_DGRAM代表UDP# 一般设置为0# 返回值为文件描述符，默认从3开始。失败返回-1*/</code></pre><div class="table-container"><table><thead><tr><th>domain</th><th>描述</th></tr></thead><tbody><tr><td>AF_INET</td><td>IPv4</td></tr><tr><td>AF_INET6</td><td>IPv6</td></tr><tr><td>AF_UNIX</td><td>UNIX</td></tr><tr><td>AF_UPSPEC</td><td>未指定</td></tr></tbody></table></div><div class="table-container"><table><thead><tr><th>type</th><th></th></tr></thead><tbody><tr><td>SOCK_DGRAM</td><td>固定长度，无连接，不可靠的报文传递（UDP）</td></tr><tr><td>SOCK_RAW</td><td></td></tr><tr><td>SOCK_SEGPACKET</td><td></td></tr><tr><td>SOCK_STREAM</td><td>有序，可靠，双向，面向连接的字节流（TCP）</td></tr></tbody></table></div><h2 id="建立连接"><a href="#建立连接" class="headerlink" title="建立连接"></a>建立连接</h2><pre><code class="lang-c++">#include &lt;sys/socket.h&gt;int connect(int sockfd, const struct sockaddr *addr, socklen_t len);//返回值：若成功，返回0；若出错，返回−1</code></pre><pre><code class="lang-c++">#include &lt;sys/socket.h&gt;int accept(int sockfd, struct sockaddr *restrict_addr,socklen_t *restrict len);/*# 参数1 --&gt; 监听套接字；创建socket时获得的文件描述符# 参数2、3为输出型参数，用来获取连接client端的协议地址# socket_t len = sizeof(struct socketaddr_in);一变量，两应用，既做输入，又做输出# 成功返回一个全新的文件描述符，我们把它叫做连接套接字。失败后-1。返回值是真正实现数据通信的套接字*/</code></pre><h2 id="绑定套接字-bind"><a href="#绑定套接字-bind" class="headerlink" title="绑定套接字 bind"></a>绑定套接字 bind</h2><pre><code class="lang-c++">#include &lt;sys/types.h&gt;          /* See NOTES */#include &lt;sys/socket.h&gt;int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);/*# 参数1 --&gt; 创建socket时获得的文件描述符# 参数2 --&gt; 指向特定协议的地址结构的指针# 参数3 --&gt; 该地址结构的长度       sockaddr_in的长度，即网络地址的长度# 成功返回0， 失败返回-1*/</code></pre><pre><code class="lang-c++">struct sockaddr_in &#123;        sa_family_t           sin_family;    //地址类型        __be16                sin_port;    //端口号          struct in_addr        sin_addr;  //IPv4 地址             unsigned char         __pad[__SOCK_SIZE__ - sizeof(short int) -  sizeof(unsigned short int) - sizeof(struct i    n_addr)];&#125;;/*# 参数1 --&gt; 地址类型# 参数2 --&gt; 端口号# 参数3 --&gt; IP地址，结构体定义如下# 参数4 --&gt; 填充位 PAD ，不需要时不用关心该成员*/ struct in_addr &#123;         __be32  s_addr; &#125;;struct sockaddr_in server_addr;server_addr.sin_family      = AF_INET;//ipv4server_addr.sin_port        = htons(atoi(argv[2]));server_addr.sin_addr.s_addr = inet_addr(argv[1]);</code></pre><pre><code class="lang-c">#include &lt;arpa/inet.h&gt;uint32_t htonl(uint32_t hostlong);uint16_t htons(uint16_t hostshort);uint32_t ntohl(uint32_t netlong);uint16_t ntohs(uint16_t netshort);/*h表示“主机”字节序，n表示“网络”字节序。l表示“长”（即4字节）整数，s表示“短”（即4字节）整数*/</code></pre><pre><code class="lang-c++">#include &lt;sys/socket.h&gt;#include &lt;netinet/in.h&gt;#include &lt;arpa/inet.h&gt;in_addr_t inet_addr(const char *cp);</code></pre><h2 id="监听listen"><a href="#监听listen" class="headerlink" title="监听listen"></a>监听listen</h2><pre><code class="lang-c++">#include &lt;sys/types.h&gt;#include &lt;sys/socket.h&gt;int listen(int sockfd, int backlog);/*# 参数1 --&gt; 创建socket时获得的文件描述符# 参数2 --&gt; 一般设置为5# 成返回0， 失败返回-1*/</code></pre><h2 id="demo"><a href="#demo" class="headerlink" title="demo"></a>demo</h2><h6 id="客户端"><a href="#客户端" class="headerlink" title="客户端"></a>客户端</h6><pre><code class="lang-c++">#include &lt;stdio.h&gt;#include &lt;sys/types.h&gt;#include &lt;sys/socket.h&gt;#include &lt;netinet/in.h&gt;#include &lt;arpa/inet.h&gt;#include &lt;stdlib.h&gt;#include &lt;string.h&gt;int main(int argc, char *argv[])&#123;    // check Input    if(argc != 3)    &#123;        printf(&quot;Invalid Input!\n&quot;);        printf(&quot;Usage# %s [ip] [port]\n&quot;);        return 1;    &#125;    // create socket    int client_sock = socket(AF_INET, SOCK_STREAM, 0);//创建一个套接字文件（IPv4，TCP，默认）    if(client_sock &lt; 0)    &#123;        perror(&quot;socket error&quot;);        exit(1);       &#125;    // connect    struct sockaddr_in server_addr;    server_addr.sin_family      = AF_INET;//地址类型 -- IPv4    server_addr.sin_port        = htons(atoi(argv[2]));//网络字节序表示的16位整数    server_addr.sin_addr.s_addr = inet_addr(argv[1]);//    int ret = connect(client_sock, (struct sockaddr *)&amp;server_addr,sizeof(struct sockaddr_in));//    if(ret &lt; 0)    &#123;        perror(&quot;connect error&quot;);        printf(&quot;*****************8&quot;);        close(client_sock);        return 4;    &#125;    printf(&quot;connect success!\n&quot;);    // send    while(1)    &#123;        printf(&quot;Send# &quot;);        fflush(stdout);        char buf[1024];        memset(buf, 0, sizeof(buf));        ssize_t _s  = read(stdin, buf, sizeof(buf));        printf(&quot;*************************\n&quot;);        if(_s &lt; 0)        &#123;            perror(&quot;read error&quot;);            close(client_sock);            return 5;        &#125;        write(client_sock ,buf, _s);        memset(buf, 0, sizeof(buf));    &#125;    return 0;&#125;</code></pre><h6 id="服务器端"><a href="#服务器端" class="headerlink" title="服务器端"></a>服务器端</h6><pre><code class="lang-c++">#include &lt;stdio.h&gt;#include &lt;sys/types.h&gt;#include &lt;sys/socket.h&gt;#include &lt;netinet/in.h&gt;#include &lt;arpa/inet.h&gt;#include &lt;stdlib.h&gt;#include &lt;string.h&gt;void Usage(char *msg)&#123;    printf(&quot;invalid Input!\n&quot;);    printf(&quot;Usage: %s [ip] [port]\n&quot;,msg);&#125;int create_socket(char *port, char *addr)&#123;    // 1.create an endpoint for communication    int sock = socket(AF_INET, SOCK_STREAM, 0);    if(sock &lt; 0)    &#123;        perror(&quot;socket error&quot;);        exit(1);    &#125;    //    struct sockaddr_in local;    local.sin_family = AF_INET;    local.sin_port   = htons(atoi(port));    local.sin_addr.s_addr   = inet_addr(addr);    if(bind(sock, (struct sockaddr *)&amp;local, sizeof(local)) &lt; 0)    &#123;        perror(&quot;bing error&quot;);        close(sock);        exit(2);    &#125;    if(listen(sock, 5) &lt; 0)    &#123;        perror(&quot;listen error&quot;);        close(sock);        exit(3);    &#125;    return sock;&#125;int main(int argc, char* argv[])&#123;    if(argc != 3)    &#123;        Usage(argv[0]);        return 1;    &#125;    // create socket    int listen_sock = create_socket(argv[2], argv[1]);    struct sockaddr_in client;    socklen_t len = sizeof(struct sockaddr);    while(1)&#123;        char buf[1024];        memset(buf, 0, sizeof(buf));        int ret = 0;        if((ret = accept(listen_sock, (struct sockaddr*)&amp;client, &amp;len)) &lt; 0)        &#123;            perror(&quot;accept error&quot;);            continue;        &#125;        while(1)        &#123;            ssize_t _s = read(ret, buf, sizeof(buf)-1);            printf(&quot;*************************\n&quot;);            if(_s &gt; 0)            &#123;                printf(&quot;client# &quot;);                fflush(stdout);清空输出缓冲区ssiz                buf[_s-1] = &#39;\0&#39;;                printf(&quot;%s\n&quot;, buf);            &#125;            else if (_s == 0)            &#123;                printf(&quot;client quit!\n&quot;);                break;            &#125;        &#125;    &#125;    return 0;&#125;</code></pre>]]></content>
+      
+      
+      <categories>
+          
+          <category> linux应用开发 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 技术 </tag>
+            
+            <tag> 编程 </tag>
+            
+            <tag> linux </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+  
+  
+</search>
