@@ -1,0 +1,1 @@
+var posts=["2023/07/22/linux驱动中断/","2023/07/24/misc驱动浅谈/","2023/07/14/hexo博客美化/","2023/08/16/在树莓派上使用Dockers运行Openwrt并作为主路由器的旁路由/","2023/07/19/挂载NFS网络文件系统实现共享文件夹/","2023/07/12/网络/"];function toRandomPost(){pjax.loadUrl('/'+posts[Math.floor(Math.random() * posts.length)]);};
